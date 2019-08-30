@@ -81,9 +81,9 @@ public class Coinfloor {
 	public static class TickerInfo {
 
 		public final int base, counter;
-		public final long last, bid, ask, low, high, volume;
+		public final long last, bid, ask, low, high, volume, time;
 
-		TickerInfo(int base, int counter, long last, long bid, long ask, long low, long high, long volume) {
+		TickerInfo(int base, int counter, long last, long bid, long ask, long low, long high, long volume, long time) {
 			this.base = base;
 			this.counter = counter;
 			this.last = last;
@@ -92,18 +92,19 @@ public class Coinfloor {
 			this.low = low;
 			this.high = high;
 			this.volume = volume;
+			this.time = time;
 		}
 
 		@Override
 		public String toString() {
-			return getClass().getSimpleName() + "[base=0x" + Integer.toHexString(base) + ", counter=0x" + Integer.toHexString(counter) + ", last=" + last + ", bid=" + bid + ", ask=" + ask + ", low=" + low + ", high=" + high + ", volume=" + volume + ']';
+			return getClass().getSimpleName() + "[base=0x" + Integer.toHexString(base) + ", counter=0x" + Integer.toHexString(counter) + ", last=" + last + ", bid=" + bid + ", ask=" + ask + ", low=" + low + ", high=" + high + ", volume=" + volume + ", time=" + time + ']';
 		}
 
 	}
 
 	private static class Ticker {
 
-		long last = -1, bid = -1, ask = -1, low = -1, high = -1, volume = -1;
+		long last = -1, bid = -1, ask = -1, low = -1, high = -1, volume = -1, time = -1;
 
 		Ticker() {
 		}
@@ -895,7 +896,7 @@ public class Coinfloor {
 	 * are reported to this callback only if the client is subscribed to the
 	 * ticker feed of an order book.
 	 */
-	protected void tickerChanged(int base, int counter, long last, long bid, long ask, long low, long high, long volume) {
+	protected void tickerChanged(int base, int counter, long last, long bid, long ask, long low, long high, long volume, long time) {
 	}
 
 	/**
@@ -1002,7 +1003,7 @@ public class Coinfloor {
 						}
 						else if ("TickerChanged".equals(notice)) {
 							TickerInfo tickerInfo = makeTickerInfo(-1, -1, message);
-							tickerChanged(tickerInfo.base, tickerInfo.counter, tickerInfo.last, tickerInfo.bid, tickerInfo.ask, tickerInfo.low, tickerInfo.high, tickerInfo.volume);
+							tickerChanged(tickerInfo.base, tickerInfo.counter, tickerInfo.last, tickerInfo.bid, tickerInfo.ask, tickerInfo.low, tickerInfo.high, tickerInfo.volume, tickerInfo.time);
 						}
 					}
                                     break;
@@ -1035,15 +1036,36 @@ public class Coinfloor {
 	}
 
 	final TickerInfo makeTickerInfo(int defaultBase, int defaultCounter, Map<?, ?> response) {
-		Object baseObj = response.get("base"), counterObj = response.get("counter"), lastObj = response.get("last"), bidObj = response.get("bid"), askObj = response.get("ask"), lowObj = response.get("low"), highObj = response.get("high"), volumeObj = response.get("volume");
+		Object	baseObj = response.get("base"), //
+				counterObj = response.get("counter"), //
+				lastObj = response.get("last"), //
+				bidObj = response.get("bid"), //
+				askObj = response.get("ask"), //
+				lowObj = response.get("low"), //
+				highObj = response.get("high"), //
+				volumeObj = response.get("volume"), //
+				timeObj = response.get("time");
 		int base = baseObj == null ? defaultBase : ((Number) baseObj).intValue(), counter = counterObj == null ? defaultCounter : ((Number) counterObj).intValue();
-		boolean lastPresent = lastObj != null || response.containsKey("last"), bidPresent = bidObj != null || response.containsKey("bid"), askPresent = askObj != null || response.containsKey("ask"), lowPresent = lowObj != null || response.containsKey("low"), highPresent = highObj != null || response.containsKey("high"), volumePresent = volumeObj != null || response.containsKey("volume");
+		boolean	lastPresent = lastObj != null || response.containsKey("last"), //
+				bidPresent = bidObj != null || response.containsKey("bid"), //
+				askPresent = askObj != null || response.containsKey("ask"), //
+				lowPresent = lowObj != null || response.containsKey("low"), //
+				highPresent = highObj != null || response.containsKey("high"), //
+				volumePresent = volumeObj != null || response.containsKey("volume"), //
+				timePresent = timeObj != null || response.containsKey("time");
 		synchronized (tickers) {
 			Ticker ticker;
 			if ((ticker = tickers.get(base << 16 | counter)) == null) {
 				tickers.put(base << 16 | counter, ticker = new Ticker());
 			}
-			return new TickerInfo(base, counter, lastPresent ? (ticker.last = lastObj == null ? -1 : ((Number) lastObj).longValue()) : ticker.last, bidPresent ? (ticker.bid = bidObj == null ? -1 : ((Number) bidObj).longValue()) : ticker.bid, askPresent ? (ticker.ask = askObj == null ? -1 : ((Number) askObj).longValue()) : ticker.ask, lowPresent ? (ticker.low = lowObj == null ? -1 : ((Number) lowObj).longValue()) : ticker.low, highPresent ? (ticker.high = highObj == null ? -1 : ((Number) highObj).longValue()) : ticker.high, volumePresent ? (ticker.volume = volumeObj == null ? -1 : ((Number) volumeObj).longValue()) : ticker.volume);
+			return new TickerInfo(base, counter, //
+					lastPresent ? (ticker.last = lastObj == null ? -1 : ((Number) lastObj).longValue()) : ticker.last, //
+					bidPresent ? (ticker.bid = bidObj == null ? -1 : ((Number) bidObj).longValue()) : ticker.bid, //
+					askPresent ? (ticker.ask = askObj == null ? -1 : ((Number) askObj).longValue()) : ticker.ask, //
+					lowPresent ? (ticker.low = lowObj == null ? -1 : ((Number) lowObj).longValue()) : ticker.low, //
+					highPresent ? (ticker.high = highObj == null ? -1 : ((Number) highObj).longValue()) : ticker.high, //
+					volumePresent ? (ticker.volume = volumeObj == null ? -1 : ((Number) volumeObj).longValue()) : ticker.volume, //
+					timePresent ? (ticker.time = timeObj == null ? -1 : ((Number) timeObj).longValue()) : ticker.time);
 		}
 	}
 
