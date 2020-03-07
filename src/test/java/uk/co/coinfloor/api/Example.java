@@ -6,7 +6,7 @@ import java.util.concurrent.Future;
 
 public class Example {
 
-	public static final int XBT = 0xF800, GBP = 0xFA20;
+	public static final int XBT = 0xF800, USDT = 0xFF03;
 
 	public static void main(String[] args) throws Exception {
 		if (args.length != 3) {
@@ -52,21 +52,21 @@ public class Example {
 			}
 
 		};
-		coinfloor.connect(URI.create("wss://api.coinfloor.co.uk/"));
+		coinfloor.connect(URI.create("wss://api.coinflex.com/v1"));
 		Future<Void> authenticateResult = coinfloor.authenticateAsync(userID, cookie, passphrase);
 		Future<Map<Integer, Long>> balancesResult = coinfloor.getBalancesAsync();
 		Future<Map<Long, Coinfloor.OrderInfo>> ordersResult = coinfloor.getOrdersAsync();
 		Future<Long> tradeVolumeXBTResult = coinfloor.getTradeVolumeAsync(XBT);
-		Future<Long> tradeVolumeGBPResult = coinfloor.getTradeVolumeAsync(GBP);
-		Future<Map<Long, Coinfloor.OrderInfo>> watchOrdersResult = coinfloor.watchOrdersAsync(XBT, GBP, true);
-		Future<Coinfloor.TickerInfo> watchTickerResult = coinfloor.watchTickerAsync(XBT, GBP, true);
+		Future<Long> tradeVolumeGBPResult = coinfloor.getTradeVolumeAsync(USDT);
+		Future<Map<Long, Coinfloor.OrderInfo>> watchOrdersResult = coinfloor.watchOrdersAsync(XBT, USDT, true);
+		Future<Coinfloor.TickerInfo> watchTickerResult = coinfloor.watchTickerAsync(XBT, USDT, true);
 		authenticateResult.get();
 		System.out.println("coinfloor.getBalances() => " + balancesResult.get());
 		System.out.println("coinfloor.getOrders() => " + ordersResult.get());
 		System.out.println("coinfloor.getTradeVolume(XBT) => " + tradeVolumeXBTResult.get());
 		System.out.println("coinfloor.getTradeVolume(GBP) => " + tradeVolumeGBPResult.get());
-		System.out.println("coinfloor.watchOrders(XBT, GBP, true) => " + watchOrdersResult.get());
-		System.out.println("coinfloor.watchTicker(XBT, GBP, true) => " + watchTickerResult.get());
+		System.out.println("coinfloor.watchOrders(XBT, USDT, true) => " + watchOrdersResult.get());
+		System.out.println("coinfloor.watchTicker(XBT, USDT, true) => " + watchTickerResult.get());
 		coinfloor.disconnect();
 	}
 
